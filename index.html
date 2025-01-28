@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brevity</title>
+    <style>
+        /* General Styling */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            background: #fff;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            overflow: hidden;
+            text-align: center;
+            transition: background 0.5s ease;
+        }
+
+        /* Background for Game Page */
+        body.game-page-active {
+            background-image: url('Brevity Background 1.png.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            animation: moveBackground 20s linear infinite;
+        }
+
+        @keyframes moveBackground {
+            0% { background-position: 0% 0%; }
+            50% { background-position: 100% 100%; }
+            100% { background-position: 0% 0%; }
+        }
+
+        header {
+            font-size: 3em;
+            font-family: 'Times New Roman', serif;
+            color: #111;
+            margin-top: 0;
+            font-weight: bold;
+        }
+
+        .logo {
+            width: 120px;
+            height: auto;
+            margin-bottom: 0.3em;
+        }
+
+        .welcome-text {
+            font-size: 1.2em;
+            color: #111;
+            margin-bottom: 1.5em;
+            margin-top: 0.5em;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 1em;
+            justify-content: center;
+            margin-top: 2em;
+        }
+
+        .play-button {
+            padding: 0.8em 1.8em;
+            font-size: 1.1em;
+            background: #f9a825;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .play-button:hover {
+            background: #fbc02d;
+        }
+
+        .game-container {
+            display: none;
+            max-width: 900px;
+            margin: 2em auto;
+            padding: 1.5em;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border: 1px solid #eee;
+            position: relative; /* Added for positioning the back arrow */
+        }
+
+        .results-container {
+            display: none;
+            max-width: 1200px;
+            margin: 2em auto;
+            padding: 2em;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border: 1px solid #eee;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2em;
+        }
+
+        .results-list {
+            height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 1.5em;
+            border-radius: 10px;
+            background: #f7f7f7;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .results-footer {
+            grid-column: 1 / -1;
+            text-align: center;
+            margin-top: 1.5em;
+        }
+
+        @media (max-width: 768px) {
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .sentence {
+            font-size: 1.4em;
+            text-align: center;
+            margin-bottom: 1em;
+            background: #fafafa;
+            padding: 1em;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+        }
+
+        .input-area {
+            display: flex;
+            justify-content: space-between;
+            gap: 1em;
+            justify-content: center;
+            margin-top: 2em;
+        }
+
+        textarea {
+            width: 80%;
+            height: 60px;
+            font-size: 1.1em;
+            padding: 0.5em;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #fff;
+            outline: none;
+        }
+
+        button {
+            padding: 0.5em;
+            font-size: 1.2em;
+            background: #f9a825;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        button:hover {
+            background: #fbc02d;
+            transform: scale(1.05);
+        }
+
+        button:disabled {
+            background: #bdbdbd;
+            color: #757575;
+            cursor: not-allowed;
+        }
+
+        #timer {
+            font-size: 0.7em;
+            color: #fff;
+            margin-top: 0.2em;
+        }
+
+        .leaderboard, .results-list {
+            margin-top: 2em;
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 1em;
+            border-radius: 8px;
+            background: #f7f7f7;
+        }
+
+        .leaderboard h2, .results-list h2 {
+            font-size: 1.5em;
+            margin-bottom: 0.5em;
+            color: #444;
+        }
+
+        .leaderboard-item, .results-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5em;
+            background: #fff;
+            margin-bottom: 0.5em;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        .leaderboard-item.user-voted {
+            background-color: #fff3e0;
+            border: 1px solid #ffcc80;
+        }
+
+        .vote-btn {
+            background: #ff5722;
+            color: #fff;
+            padding: 0.3em 0.5em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            font-size: 0.9em;
+        }
+
+        .vote-btn:disabled {
+            background: #bdbdbd;
+            color: #757575;
+            cursor: not-allowed;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2em; /* Equal horizontal padding */
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            max-width: 400px;
+        }
+
+        .modal-content h3 {
+            margin: 0 0 1em 0;
+            color: #333;
+            font-size: 1.4em;
+        }
+
+        #username-input {
+            box-sizing: border-box; /* Added */
+            width: calc(100% - 0.2em); /* Adjusted width */
+            padding: 0.8em 1.2em;
+            margin-bottom: 1.2em;
+            border: 2px solid #f9a825;
+            border-radius: 8px;
+            font-size: 1em;
+            text-align: center;
+            outline: none;
+        }
+
+        #username-input::placeholder {
+            color: #aaa;
+            font-style: normal;
+        }
+
+        .modal-content button {
+            background: #f9a825;
+            color: white;
+            border: none;
+            padding: 0.8em 2.5em;
+            border-radius: 6px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .modal-content button:hover {
+            background: #fbc02d;
+        }
+
+        #modal-submit:disabled {
+            background: #bdbdbd !important;
+            cursor: not-allowed;
+        }
+
+        /* Back Arrow Circle */
+        .back-arrow {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 36px;
+            height: 36px;
+            background: #f9a825;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease; /* Changed to match button transitions */
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .back-arrow:hover {
+            background: #fbc02d; /* Match button hover color */
+            transform: scale(1.05); /* Add scale effect like other buttons */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Enhanced shadow on hover */
+        }
+
+        .back-arrow::before {
+            content: '🡨';
+            font-size: 1.4em; /* Smaller arrow */
+            font-weight: regular;
+            color: #fff;
+            position: relative;
+            left: -1px;
+            transform: scaleX(1.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Username Modal -->
+<div id="username-modal" class="modal">
+    <div class="modal-content">
+        <h3>Choose Your Display Name</h3>
+        <input type="text" id="username-input" 
+               maxlength="10" 
+               placeholder="up to 10 characters"
+               oninput="validateUsername()">
+        <button id="modal-submit" disabled>Submit</button>
+    </div>
+</div>
+
+<div id="landing-page">
+    <img src="logo.png.png" alt="Brevity Logo" class="logo">
+    <header>
+        Brevity
+    </header>
+
+    <div class="welcome-text">One brief. One headline. Endless possibilities.</div>
+    <div class="button-container">
+        <button class="play-button" onclick="startGame()">Play</button>
+        <button class="play-button" onclick="showResults()">Results</button>
+    </div>
+</div>
+
+<div class="game-container" id="game-page">
+    <!-- Back Arrow Circle -->
+    <div class="back-arrow" onclick="goBack()"></div>
+
+    <div class="sentence" id="originalSentence">
+        Convince a Coldplay fan to not attend the Coldplay concert
+    </div>
+
+    <div class="input-area">
+        <textarea id="textInput" placeholder="WRITE YOUR HEADLINE HERE..."></textarea>
+        <button id="submitButton" onclick="submitLine()" style="padding: 0.4em 1.2em; font-size: 1.1em;">
+            <span id="submitText">Submit</span>
+            <div id="timer">Voting ends in 07:00:00</div>
+        </button>
+    </div>
+
+    <div class="leaderboard">
+        <h2>Leaderboard</h2>
+        <div id="leaderboard-content"></div>
+    </div>
+</div>
+
+<div class="results-container" id="results-page">
+    <div class="results-grid">
+        <div class="results-list">
+            <h2>Yesterday's Top 10</h2>
+            <div id="top-entries"></div>
+        </div>
+        <div class="results-list">
+            <h2>Hall of Fame</h2>
+            <div id="hall-of-fame"></div>
+        </div>
+        <div class="results-footer">
+            <button class="play-button" onclick="goBack()">Home</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let username = localStorage.getItem('brevityUsername') || null;
+    const MAX_ENTRIES = 1000;
+    let entries = JSON.parse(localStorage.getItem('brevityEntries')) || [];
+    const timerElement = document.getElementById('timer');
+    const submitButton = document.getElementById('submitButton');
+    const submitText = document.getElementById('submitText');
+    let pendingSubmission = null;
+
+    // Helper functions for time calculations
+    function getVoteLockExpiration(timestamp) {
+        const voteDate = new Date(timestamp);
+        const expiration = new Date(voteDate);
+        expiration.setDate(expiration.getDate() + 1);
+        expiration.setHours(8, 0, 0, 0); // Lock until 8 AM next day
+        return expiration.getTime();
+    }
+
+    function isLeaderboardVisible() {
+        const lastSubmission = localStorage.getItem('brevityLastSubmissionTimestamp');
+        if (!lastSubmission) return false;
+        const submissionTime = Number(lastSubmission);
+        const expiration = new Date(submissionTime);
+        expiration.setDate(expiration.getDate() + 1);
+        expiration.setHours(6, 0, 0, 0); // Visible until 6 AM next day
+        return Date.now() < expiration;
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('username-modal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeModal();
+        }
+    });
+
+    function closeModal() {
+        document.getElementById('username-modal').style.display = 'none';
+        pendingSubmission = null; // Reset pending submission
+    }
+
+    function getCurrentPhase() {
+        const now = new Date();
+        const today8AM = new Date(now);
+        today8AM.setHours(8, 0, 0, 0);
+        const today8PM = new Date(now);
+        today8PM.setHours(20, 0, 0, 0);
+
+        if (now < today8AM) {
+            return {
+                state: 'pre-submission',
+                target: today8AM,
+                buttonText: 'Submit in',
+                timerPrefix: ''
+            };
+        }
+
+        if (now < today8PM) {
+            return {
+                state: 'voting-open',
+                target: today8PM,
+                buttonText: 'Submit',
+                timerPrefix: 'Voting ends in '
+            };
+        }
+
+        return {
+            state: 'voting-closed',
+            target: new Date(today8AM.getTime() + 86400000),
+            buttonText: 'Submit',
+            timerPrefix: 'Voting closed!'
+        };
+    }
+
+    function updateTimerDisplay() {
+        const phase = getCurrentPhase();
+        const now = new Date();
+
+        submitText.textContent = phase.buttonText;
+        submitButton.disabled = phase.state !== 'voting-open';
+
+        if (phase.state === 'voting-closed') {
+            timerElement.textContent = phase.timerPrefix;
+            return;
+        }
+
+        const remaining = phase.target - now;
+        const hours = Math.floor(remaining / 3600000).toString().padStart(2, '0');
+        const minutes = Math.floor((remaining % 3600000) / 60000).toString().padStart(2, '0');
+        const seconds = Math.floor((remaining % 60000) / 1000).toString().padStart(2, '0');
+
+        timerElement.textContent = `${phase.timerPrefix}${hours}:${minutes}:${seconds}`;
+    }
+
+    function startTimer() {
+        updateTimerDisplay();
+        setInterval(updateTimerDisplay, 1000);
+    }
+
+    function startGame() {
+        document.getElementById('landing-page').style.display = 'none';
+        document.getElementById('game-page').style.display = 'block';
+        document.body.classList.add('game-page-active');
+        startTimer();
+        
+        // Update leaderboard visibility
+        const leaderboard = document.querySelector('.leaderboard');
+        leaderboard.style.display = isLeaderboardVisible() ? 'block' : 'none';
+    }
+
+    function showResults() {
+        document.getElementById('landing-page').style.display = 'none';
+        document.getElementById('results-page').style.display = 'block';
+        document.body.classList.remove('game-page-active');
+        displayResults();
+    }
+
+    function goBack() {
+        document.getElementById('results-page').style.display = 'none';
+        document.getElementById('game-page').style.display = 'none';
+        document.getElementById('landing-page').style.display = 'block';
+        document.body.classList.remove('game-page-active');
+    }
+
+    function submitLine() {
+        const textarea = document.getElementById('textInput');
+        const text = textarea.value.trim();
+        if (!text) return;
+
+        if (!username) {
+            pendingSubmission = text;
+            showUsernameModal();
+            return;
+        }
+
+        const newEntry = {
+            user: username,
+            text: text,
+            votes: 0,
+            timestamp: Date.now()
+        };
+
+        entries.push(newEntry);
+        localStorage.setItem('brevityEntries', JSON.stringify(entries));
+        localStorage.setItem('brevityLastSubmissionTimestamp', Date.now().toString());
+        document.querySelector('.leaderboard').style.display = 'block';
+        textarea.value = '';
+        updateLeaderboard();
+    }
+
+    function validateUsername() {
+        const input = document.getElementById('username-input');
+        const submitBtn = document.getElementById('modal-submit');
+        const username = input.value.trim();
+        submitBtn.disabled = username.length === 0 || username.length > 10;
+    }
+
+    function showUsernameModal() {
+        document.getElementById('username-modal').style.display = 'flex';
+        document.getElementById('username-input').focus();
+    }
+
+    function submitUsername() {
+        const input = document.getElementById('username-input');
+        username = input.value.trim().substring(0, 10) || "Anonymous";
+        localStorage.setItem('brevityUsername', username);
+        
+        closeModal();
+        
+        if (pendingSubmission) {
+            entries.push({ 
+                user: username,
+                text: pendingSubmission, 
+                votes: 0,
+                timestamp: Date.now()
+            });
+            localStorage.setItem('brevityEntries', JSON.stringify(entries));
+            localStorage.setItem('brevityLastSubmissionTimestamp', Date.now().toString());
+            document.getElementById('textInput').value = '';
+            pendingSubmission = null;
+            updateLeaderboard();
+        }
+    }
+
+    document.getElementById('username-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && !document.getElementById('modal-submit').disabled) {
+            submitUsername();
+        }
+    });
+
+    function updateLeaderboard() {
+        const leaderboard = document.querySelector('.leaderboard');
+        const leaderboardContent = document.getElementById('leaderboard-content');
+        leaderboard.style.display = isLeaderboardVisible() ? 'block' : 'none';
+
+        leaderboardContent.innerHTML = '';
+        entries.sort((a, b) => b.votes - a.votes);
+        entries.slice(0, MAX_ENTRIES).forEach((entry, index) => {
+            const item = document.createElement('div');
+            item.classList.add('leaderboard-item');
+            
+            // Check if user voted for this entry
+            const userVotes = JSON.parse(localStorage.getItem('brevityUserVotes') || '{}');
+            if (userVotes[entry.timestamp]) {
+                item.classList.add('user-voted');
+            }
+
+            const text = document.createElement('div');
+            text.textContent = `${index + 1}. ${entry.text}`;
+
+            const voteButton = document.createElement('button');
+            voteButton.textContent = `Vote (${entry.votes})`;
+            voteButton.classList.add('vote-btn');
+            
+            // Check voting eligibility
+            const lastVoteTimestamp = localStorage.getItem('brevityLastVoteTimestamp');
+            let isVoteLocked = false;
+            if (lastVoteTimestamp) {
+                const expiration = getVoteLockExpiration(Number(lastVoteTimestamp));
+                isVoteLocked = Date.now() < expiration;
+            }
+            const phase = getCurrentPhase();
+            voteButton.disabled = phase.state !== 'voting-open' || isVoteLocked;
+
+            voteButton.onclick = () => {
+                const currentPhase = getCurrentPhase();
+                if (currentPhase.state !== 'voting-open') {
+                    alert('Voting is currently closed!');
+                    return;
+                }
+
+                const lastVote = localStorage.getItem('brevityLastVoteTimestamp');
+                if (lastVote) {
+                    const expiration = getVoteLockExpiration(Number(lastVote));
+                    if (Date.now() < expiration) {
+                        alert('You can vote again after 8 AM tomorrow.');
+                        return;
+                    }
+                }
+
+                entry.votes += 1;
+                const userVotes = JSON.parse(localStorage.getItem('brevityUserVotes') || '{}');
+                userVotes[entry.timestamp] = true;
+                localStorage.setItem('brevityUserVotes', JSON.stringify(userVotes));
+                localStorage.setItem('brevityLastVoteTimestamp', Date.now().toString());
+                localStorage.setItem('brevityEntries', JSON.stringify(entries));
+                updateLeaderboard();
+            };
+
+            item.appendChild(text);
+            item.appendChild(voteButton);
+            leaderboardContent.appendChild(item);
+        });
+    }
+
+    function displayResults() {
+        const topEntries = document.getElementById('top-entries');
+        const hallOfFame = document.getElementById('hall-of-fame');
+
+        topEntries.innerHTML = '';
+        hallOfFame.innerHTML = '';
+
+        entries.sort((a, b) => b.votes - a.votes);
+        entries.slice(0, MAX_ENTRIES).forEach((entry, index) => {
+            const item = document.createElement('div');
+            item.classList.add('results-item');
+            item.textContent = `${index + 1}. ${entry.user}: ${entry.text} (${entry.votes} votes)`;
+            topEntries.appendChild(item);
+        });
+
+        const hallOfFameData = entries.reduce((acc, entry) => {
+            acc[entry.user] = (acc[entry.user] || 0) + 1;
+            return acc;
+        }, {});
+
+        Object.entries(hallOfFameData)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 10)
+            .forEach(([user, days]) => {
+                const item = document.createElement('div');
+                item.classList.add('results-item');
+                item.textContent = `${user} (${days} days in top 10)`;
+                hallOfFame.appendChild(item);
+            });
+    }
+
+    startTimer();
+</script>
+</body>
+</html>
