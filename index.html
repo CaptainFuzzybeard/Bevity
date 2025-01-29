@@ -24,11 +24,17 @@
 
         /* Background for Game Page */
         body.game-page-active {
-            background-image: url('Brevity Background 1.png.png');
+            background-image: url('Brevity Background.png.png');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
+            animation: moveBackground 20s linear infinite;
+        }
 
+        @keyframes moveBackground {
+            0% { background-position: 0% 0%; }
+            50% { background-position: 100% 100%; }
+            100% { background-position: 0% 0%; }
         }
 
         header {
@@ -88,7 +94,7 @@
 
         .results-container {
             display: none;
-            max-width: 1200px;
+            max-width: 850px;
             margin: 2em auto;
             padding: 2em;
             background: rgba(255, 255, 255, 0.9);
@@ -503,6 +509,7 @@
     }
 
     function startGame() {
+        checkAndResetDaily();
         document.getElementById('landing-page').style.display = 'none';
         document.getElementById('game-page').style.display = 'block';
         document.body.classList.add('game-page-active');
@@ -512,6 +519,34 @@
         const leaderboard = document.querySelector('.leaderboard');
         leaderboard.style.display = isLeaderboardVisible() ? 'block' : 'none';
     }
+
+function checkAndResetDaily() {
+    const lastReset = localStorage.getItem('brevityLastResetDate');
+    const today = new Date();
+    const todayString = today.toISOString().split('T')[0]; // Get YYYY-MM-DD
+
+    if (lastReset === todayString) {
+        return; // No reset needed if already reset today
+    }
+
+    const resetTime = new Date(today);
+    resetTime.setHours(8, 0, 0, 0); // Reset at 8 AM
+
+    if (today >= resetTime) {
+        // Clear game data for the new day
+        localStorage.removeItem('brevityEntries'); // Reset entries
+        localStorage.removeItem('brevityUserVotes'); // Reset votes
+        localStorage.removeItem('brevityHasVoted'); // Allow new votes
+        localStorage.removeItem('brevityLastVoteTimestamp');
+        localStorage.removeItem('brevityLastSubmissionTimestamp');
+
+        // Save today's date as last reset
+        localStorage.setItem('brevityLastResetDate', todayString);
+
+        console.log('Game data has been reset for the new day.');
+    }
+}
+
 
     function showResults() {
         document.getElementById('landing-page').style.display = 'none';
@@ -583,8 +618,9 @@
             localStorage.setItem('brevityLastSubmissionTimestamp', Date.now().toString());
             document.getElementById('textInput').value = '';
             pendingSubmission = null;
-            updateLeaderboard();
-        }
+            updateLeaderboard(); // Ensure leaderboard becomes visible
+    document.querySelector('.leaderboard').style.display = 'block'; // Force display
+}
     }
 
     document.getElementById('username-input').addEventListener('keypress', function(e) {
@@ -633,6 +669,10 @@
                     alert('Voting is currently closed!');
                     return;
                 }
+if (localStorage.getItem('brevityHasVoted') === 'true') {
+        alert('You have already voted today. You can vote again after 8 AM tomorrow.');
+        return;
+    }
 
                 const lastVote = localStorage.getItem('brevityLastVoteTimestamp');
                 if (lastVote) {
