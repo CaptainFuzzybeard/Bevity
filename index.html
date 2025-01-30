@@ -578,20 +578,25 @@
         
         closeModal();
         
-        if (pendingSubmission) {
-            entries.push({ 
-                user: username,
-                text: pendingSubmission, 
-                votes: 0,
-                timestamp: Date.now()
-            });
-            localStorage.setItem('brevityEntries', JSON.stringify(entries));
-            localStorage.setItem('brevityLastSubmissionTimestamp', Date.now().toString());
-            document.getElementById('textInput').value = '';
-            pendingSubmission = null;
-            updateLeaderboard();
-        }
+    if (pendingSubmission) {
+        const newEntry = { 
+            user: username,
+            text: pendingSubmission, 
+            votes: 0,
+            timestamp: Date.now()
+        };
+
+        entries.push(newEntry);
+        localStorage.setItem('brevityEntries', JSON.stringify(entries));
+        localStorage.setItem('brevityLastSubmissionTimestamp', Date.now().toString());
+
+        document.getElementById('textInput').value = ''; // Clear input field
+        pendingSubmission = null;
+
+        updateLeaderboard(); // Update leaderboard immediately
+        document.querySelector('.leaderboard').style.display = 'block'; // Ensure visibility
     }
+}
 
     document.getElementById('username-input').addEventListener('keypress', function(e) {
         if (e.key === 'Enter' && !document.getElementById('modal-submit').disabled) {
